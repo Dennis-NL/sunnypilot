@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/bash
 
 if [ -z "$BASEDIR" ]; then
   BASEDIR="/data/openpilot"
@@ -86,7 +86,8 @@ function launch {
   if [ ! -f $DIR/prebuilt ]; then
     ./build.py
   fi
-  ./manager.py
+
+  ./mapd_installer.py; ./manager.py
 
   # if broken, keep on screen error
   while true; do sleep 1; done
