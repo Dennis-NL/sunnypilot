@@ -111,8 +111,6 @@ class ALTERNATIVE_EXPERIENCE:
   DISABLE_STOCK_AEB = 2
   RAISE_LONGITUDINAL_LIMITS_TO_ISO_MAX = 8
   ALLOW_AEB = 16
-  ENABLE_MADS = 32
-  MADS_DISABLE_DISENGAGE_LATERAL_ON_BRAKE = 64
 
 class Panda:
 
@@ -139,7 +137,7 @@ class Panda:
   SAFETY_SUBARU_PREGLOBAL = 22
   SAFETY_HYUNDAI_LEGACY = 23
   SAFETY_HYUNDAI_COMMUNITY = 24
-  SAFETY_STELLANTIS = 25
+  SAFETY_VOLKSWAGEN_MLB = 25
   SAFETY_FAW = 26
   SAFETY_BODY = 27
   SAFETY_HYUNDAI_CANFD = 28
@@ -193,17 +191,11 @@ class Panda:
   FLAG_TOYOTA_ALT_BRAKE = (1 << 8)
   FLAG_TOYOTA_STOCK_LONGITUDINAL = (2 << 8)
   FLAG_TOYOTA_LTA = (4 << 8)
-  FLAG_TOYOTA_GAS_INTERCEPTOR = (8 << 8)
-
-  FLAG_TOYOTA_SDSU = (64 << 8)
-  FLAG_TOYOTA_UNSUPPORTED_DSU_CAR = (128 << 8)
 
   FLAG_HONDA_ALT_BRAKE = 1
   FLAG_HONDA_BOSCH_LONG = 2
   FLAG_HONDA_NIDEC_ALT = 4
   FLAG_HONDA_RADARLESS = 8
-  FLAG_HONDA_GAS_INTERCEPTOR = 16
-  FLAG_HONDA_CLARITY = 32
 
   FLAG_HYUNDAI_EV_GAS = 1
   FLAG_HYUNDAI_HYBRID_GAS = 2
@@ -213,9 +205,6 @@ class Panda:
   FLAG_HYUNDAI_CANFD_ALT_BUTTONS = 32
   FLAG_HYUNDAI_ALT_LIMITS = 64
   FLAG_HYUNDAI_CANFD_HDA2_ALT_STEERING = 128
-  FLAG_HYUNDAI_LFA_BTN = 256
-  FLAG_HYUNDAI_ESCC = 512
-  FLAG_HYUNDAI_NON_SCC = 1024
 
   FLAG_TESLA_POWERTRAIN = 1
   FLAG_TESLA_LONG_CONTROL = 2
@@ -228,11 +217,8 @@ class Panda:
 
   FLAG_SUBARU_GEN2 = 1
   FLAG_SUBARU_LONG = 2
-  FLAG_SUBARU_MAX_STEER_IMPREZA_2018 = 4
 
   FLAG_SUBARU_PREGLOBAL_REVERSED_DRIVER_TORQUE = 1
-
-  FLAG_SUBARU_SNG = 1024
 
   FLAG_NISSAN_ALT_EPS_BUS = 1
 
@@ -375,7 +361,6 @@ class Panda:
           try:
             this_serial = device.getSerialNumber()
           except Exception:
-            logging.exception("failed to get serial number of panda")
             continue
 
           if serial is None or this_serial == serial:
@@ -427,7 +412,7 @@ class Panda:
               else:
                 logging.warning(f"found device with panda descriptors but invalid serial: {serial}", RuntimeWarning)
             except Exception:
-              logging.exception("error connecting to panda")
+              continue
     except Exception:
       logging.exception("exception while listing pandas")
     return ret
