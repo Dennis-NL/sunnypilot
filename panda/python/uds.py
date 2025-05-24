@@ -301,7 +301,7 @@ def get_dtc_status_names(status):
   return result
 
 class CanClient():
-  def __init__(self, can_send: Callable[[int, bytes, int], None], can_recv: Callable[[], list[tuple[int, int, bytes, int]]],
+  def __init__(self, can_send: Callable[[int, bytes, int], None], can_recv: Callable[[], list[tuple[int, bytes, int]]],
                tx_addr: int, rx_addr: int, bus: int, sub_addr: int | None = None, debug: bool = False):
     self.tx = can_send
     self.rx = can_recv
@@ -339,7 +339,7 @@ class CanClient():
           print(f"CAN-RX: drain - {len(msgs)}")
         self.rx_buff.clear()
       else:
-        for rx_addr, _, rx_data, rx_bus in msgs or []:
+        for rx_addr, rx_data, rx_bus in msgs or []:
           if self._recv_filter(rx_bus, rx_addr) and len(rx_data) > 0:
             rx_data = bytes(rx_data)  # convert bytearray to bytes
 
@@ -455,7 +455,8 @@ class IsoTpMessage():
         for msg in self._can_client.recv():
           frame_type = self._isotp_rx_next(msg)
           start_time = time.monotonic()
-          rx_in_progress = frame_type == ISOTP_FRAME_TYPE.CONSECUTIVE
+          # Anything that signifies we're building a response
+          rx_in_progress = frame_type in (ISOTP_FRAME_TYPE.FIRST, ISOTP_FRAME_TYPE.CONSECUTIVE)
           if self.tx_done and self.rx_done:
             return self.rx_dat, False
         # no timeout indicates non-blocking
@@ -473,6 +474,7 @@ class IsoTpMessage():
     # assert len(rx_data) == self.max_len, f"isotp - rx: invalid CAN frame length: {len(rx_data)}"
 
     if rx_data[0] >> 4 == ISOTP_FRAME_TYPE.SINGLE:
+      assert self.rx_dat == b"" or self.rx_done, "isotp - rx: single frame with active frame"
       self.rx_len = rx_data[0] & 0x0F
       assert self.rx_len < self.max_len, f"isotp - rx: invalid single frame length: {self.rx_len}"
       self.rx_dat = rx_data[1:1 + self.rx_len]
@@ -483,8 +485,11 @@ class IsoTpMessage():
       return ISOTP_FRAME_TYPE.SINGLE
 
     elif rx_data[0] >> 4 == ISOTP_FRAME_TYPE.FIRST:
+      # Once a first frame is received, further frames must be consecutive
+      assert self.rx_dat == b"" or self.rx_done, "isotp - rx: first frame with active frame"
       self.rx_len = ((rx_data[0] & 0x0F) << 8) + rx_data[1]
-      assert self.max_len <= self.rx_len, f"isotp - rx: invalid first frame length: {self.rx_len}"
+      assert self.rx_len >= self.max_len, f"isotp - rx: invalid first frame length: {self.rx_len}"
+      assert len(rx_data) == self.max_len, f"isotp - rx: invalid CAN frame length: {len(rx_data)}"
       self.rx_dat = rx_data[2:]
       self.rx_idx = 0
       self.rx_done = False
