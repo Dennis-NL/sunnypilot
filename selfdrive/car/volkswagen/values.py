@@ -414,11 +414,20 @@ class CAR(Platforms):
     chassis_codes={"8U", "F3", "FS"},
     wmis={WMI.AUDI_EUROPE_MPV, WMI.AUDI_GERMANY_CAR},
   )
+  AUDI_Q5_8R = VolkswagenMLBPlatformConfig( # Chassis FL
+    [
+      VWCarDocs("Audi Q5 8R Hybrid 2011-2017"),
+      #VWCarDocs("Audi Q5 8R Facelift 2013-2017"),
+    ],
+    VolkswagenCarSpecs(mass=1840, wheelbase=2.81),
+    wmis={WMI.AUDI_GERMANY_CAR},
+  )
   PORSCHE_MACAN_MK1 = VolkswagenMLBPlatformConfig(
     [VWCarDocs("Porsche Macan 2017-24")],
     VolkswagenCarSpecs(mass=1895, wheelbase=2.81),
     # TODO: VIN scheme doesn't match VW
   )
+
   SEAT_ATECA_MK1 = VolkswagenMQBPlatformConfig(
     [
       VWCarDocs("CUPRA Ateca 2018-23"),
